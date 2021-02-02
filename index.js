@@ -126,9 +126,5 @@ readdir("./commands/", (err, files) => {
     });
 });
 
-client.on('ready', () => {
-    client.user.setActivity('g!help | multiple languages available!', { type: 'WATCHING' });
-
- });
 
 client.login(config.token);
