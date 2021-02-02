@@ -1,21 +1,23 @@
+let cd = new Set(), cdseconds = 5;
+
 module.exports = (client, message) => {
-    
-    // Ignore all bots
-    if (message.author.bot) return;
+ if(message.author.bot || !message.guild)return;
+  let language = client.db.fetch(`language_${message.guild.id}`);
+  if (!language) language = client.config.basiclang;
+  const lang = require(`../language/${language}`);
+
+  let prefix;
+  let prefixes = client.db.fetch(`prefix_${message.guild.id}`);
+  (!prefixes) ? (prefix = client.config.prefix) : (prefix = prefixes);
+    if (!message.content.startsWith(prefix)) return;
+
+  const args = message.content.slice(prefix.length).trim().split(/ +/g), commandName = args.shift().toLowerCase();
+  const command = client.commands.get(commandName);
+
+  if (!command) return;
+
+  let blacklist = client.db.fetch(`blacklist_${message.author.id}`)
+  if (blacklist === "Blacklisted") return message.reply(lang.blacklist.blacklist)
   
-    // Ignore messages not starting with the prefix (in config.json)
-    if (message.content.indexOf(client.config.prefix) !== 0) return;
-  
-    // Our standard argument/command name definition.
-    const args = message.content.slice(client.config.prefix.length).trim().split(/ +/g);
-    const command = args.shift().toLowerCase();
-  
-    // Grab the command data from the client.commands Enmap
-    const cmd = client.commands.get(command);
-  
-    // If that command doesn't exist, silently exit and do nothing
-    if (!cmd) return;
-  
-    // Run the command
-    cmd.run(client, message, args);
+ command.run(client, message, args, lang);
 };
