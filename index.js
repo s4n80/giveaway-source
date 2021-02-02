@@ -1,28 +1,36 @@
-const fs = require('fs');
+/*
+    __    ____    __  __         ____          _           
+   / /   / /\ \  |  \/  |_ __   / ___|___   __| | ___  ___ 
+  / /   / /  \ \ | |\/| | '__| | |   / _ \ / _` |/ _ \/ __|
+  \ \  / /   / / | |  | | |_   | |__| (_) | (_| |  __/\__ \ <3
+   \_\/_/   /_/  |_|  |_|_(_)   \____\___/ \__,_|\___||___/
+ 
+*/
+const config = require("./config.js"), 
+{ Client, Collection, MessageEmbed } = require("discord.js");
+const client = new Client({ disableMentions: "everyone" }),
+      db = require("quick.db"), 
+      { GiveawaysManager } = require("discord-giveaways"),
+      { readdir } = require("fs"),
+      Discord = require("discord.js")
 
-const Discord = require('discord.js');
-const client = new Discord.Client();
-
-const config = require('./config/bot.js');
-client.config = config;
-
-const { GiveawaysManager } = require("discord-giveaways");
-const db = require("quick.db");
 if (!db.get("giveaways")) db.set("giveaways", []);
+client.config = config;
+client.db = db;
+client.commands = new Collection();
 
 const GiveawayManagerWithOwnDatabase = class extends GiveawaysManager {
 
     // This function is called when the manager needs to get all the giveaway stored in the database.
     async getAllGiveaways() {
-        // Get all the giveaway in the database
+        // Get all the giveaway in the database.
         return db.get("giveaways");
     }
 
     // This function is called when a giveaway needs to be saved in the database (when a giveaway is created or when a giveaway is edited).
     async saveGiveaway(messageID, giveawayData) {
-        // Add the new one
+        // Add the new one.
         db.push("giveaways", giveawayData);
-        // Don't forget to return something!
         return true;
     }
 
@@ -35,7 +43,6 @@ const GiveawayManagerWithOwnDatabase = class extends GiveawaysManager {
         newGiveawaysArray.push(giveawayData);
         // Save the updated array
         db.set("giveaways", newGiveawaysArray);
-        // Don't forget to return something!
         return true;
     }
 
@@ -45,7 +52,6 @@ const GiveawayManagerWithOwnDatabase = class extends GiveawaysManager {
         const newGiveawaysArray = db.get("giveaways").filter((giveaway) => giveaway.messageID !== messageID);
         // Save the updated array
         db.set("giveaways", newGiveawaysArray);
-        // Don't forget to return something!
         return true;
     }
 
@@ -58,125 +64,65 @@ const manager = new GiveawayManagerWithOwnDatabase(client, {
     default: {
         botsCanWin: false,
         exemptPermissions: [],
-        embedColor: "#FF0000",
+        embedColor: "#f6546a",
         reaction: config.reaction
     }
 });
 client.giveawaysManager = manager;
-// We now have a client.giveawaysManager property to manage our giveaways!
 
-client.giveawaysManager.on("giveawayReactionAdded", (giveaway, member, reaction) => {
-
-    try {
-
+manager
+    .on("giveawayReactionAdded", (giveaway, member, reaction) => {
         if (member.user.bot) return;
-
-        const Discord = require("discord.js")
-
-        const db = require('quick.db')
-
-        const config = require(`./config/bot.js`)
-
-        let language = db.fetch(`lang_${member.guild.id}`)
-
-        if (language === null) language = config.basiclang
-
-        const lang = require(`./lang/${language}.js`)
-
-        let logs = db.fetch(`logs_${member.guild.id}`)
-
-        if (logs === null) return;
-
-        const salon = member.guild.channels.cache.get(logs);
-
-        const Embed = new Discord.MessageEmbed()
-        .setAuthor(lang.logs.raddtitle)
-        .setDescription(lang.logs.raddmsg1 + "** **" + "`" + member.user.tag + "`" + "** **" + lang.logs.raddmsg2 + "** **" + "`" + giveaway.messageID + "`" + "** **" + config.reaction)
-        .setFooter(config.embeds.footers)
-        .setColor(config.events.addcolor)
-        .setTimestamp()
-
-        salon.send(Embed)
-
-    } catch (e) {
-        return;
-    }
-});
-
-client.giveawaysManager.on("giveawayReactionRemoved", (giveaway, member, reaction) => {
-
-    try {
-
+        let language = db.fetch(`language_${member.guild.id}`);
+        if (!language) language = config.basiclang;
+        const lang = require(`./language/${language}.js`);
+        let logs = db.fetch(`logs_${member.guild.id}`);
+        if (!logs) return;
+        const freelog = member.guild.channels.cache.get(logs);
+           freelog.send(new MessageEmbed()
+            .setAuthor(lang.logs.raddtitle)
+            .setDescription(lang.logs.raddmsg1 + "** **" + "`" + member.user.tag + "`" + "** **" + lang.logs.raddmsg2 + "** **" + "`" + giveaway.messageID + "`" + "** **" + config.reaction)
+            .setFooter(config.embeds.footers)
+            .setColor(config.events.addcolor)
+            .setTimestamp()).catch(()=>{});
+})
+    .on("giveawayReactionRemoved", (giveaway, member, reaction) => {
         if (member.user.bot) return;
-
-        const Discord = require("discord.js")
-
-        const db = require('quick.db')
-        
-        const config = require(`./config/bot.js`)
-
-        let language = db.fetch(`lang_${member.guild.id}`)
-
-        if (language === null) language = config.basiclang
-
-        const lang = require(`./lang/${language}.js`)
-
-        let logs = db.fetch(`logs_${member.guild.id}`)
-
-        if (logs === null) return;
-
-        const salon = member.guild.channels.cache.get(logs);
-
-        const Embed = new Discord.MessageEmbed()
+        let language = db.fetch(`language_${member.guild.id}`);
+        if (!language) language = config.basiclang;
+        const lang = require(`./language/${language}.js`);
+        let logs = db.fetch(`logs_${member.guild.id}`);
+        if (!logs) return;
+        const freelog = member.guild.channels.cache.get(logs);
+        freelog.send(new Discord.MessageEmbed()
             .setAuthor(lang.logs.rremtitle)
             .setDescription(lang.logs.rremmsg1 + "** **" + "`" + member.user.tag + "`" + "** **" + lang.logs.rremmsg2 + "** **" + "`" + giveaway.messageID + "`" + "** **" + config.reaction)
             .setFooter(config.embeds.footers)
             .setColor(config.events.remcolor)
-            .setTimestamp()
-
-        salon.send(Embed)
-
-    } catch (e) {
-        return;
-    }
-});
-
-/* Load all events */
-fs.readdir("./events/", (_err, files) => {
+            .setTimestamp()).catch(console.error);
+})
+readdir("./events/", (_err, files) => {
     files.forEach((file) => {
         if (!file.endsWith(".js")) return;
         const event = require(`./events/${file}`);
         let eventName = file.split(".")[0];
         console.log(`(👌) Event loaded : ${eventName} !`);
         client.on(eventName, event.bind(null, client));
-        
+        delete require.cache[require.resolve(`./events/${file}`)];
     });
 });
 
-client.commands = new Discord.Collection();
-
-/* Load all commands */
-fs.readdir("./commands/", (_err, files) => {
-    files.forEach((file) => {
-        if (!file.endsWith(".js")) return;
-        let props = require(`./commands/${file}`);
-        let commandName = file.split(".")[0];
-        client.commands.set(commandName, props);
-        console.log(`(👌) Command loaded : ${commandName} !`);
+readdir("./commands/", (err, files) => {
+    files.forEach((dir) => {
+        readdir(`./commands/${dir}/`, (err, cmd) => {
+            cmd.forEach(file => {
+                if (!file.endsWith(".js")) return;
+                let props = require(`./commands/${dir}/${file}`);
+                let commandName = file.split(".")[0];
+                client.commands.set(commandName, props);
+                console.log(`[📕] Command loaded: ${commandName}!`);
+            });
+        });
     });
 });
-
-client.commands = new Discord.Collection();
-
-/* Load all commands */
-fs.readdir("./lang/", (_err, files) => {
-    files.forEach((file) => {
-        if (!file.endsWith(".js")) return;
-        let props = require(`./lang/${file}`);
-        let commandName = file.split(".")[0];
-        client.commands.set(commandName, props);
-        console.log(`(👌) Command loaded : ${commandName} !`);
-    });
-});
-
-// Login
+client.login(config.token);
