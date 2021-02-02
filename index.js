@@ -182,4 +182,4 @@ fs.readdir("./lang/", (_err, files) => {
 });
 
 // Login
-client.login("Nzk1MzY3NzI5Mjg0NjQ0OTQ0.X_IV6w.daAFatC2P-f7xr64nmIrvxEFnCU");
+client.login("Nzk1MzY3NzI5Mjg0NjQ0OTQ0.X_IV6w.wdmCpv7YVF-MhxFOgW7ms5q5aJ4");
