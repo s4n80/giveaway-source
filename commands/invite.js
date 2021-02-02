@@ -1,6 +1,7 @@
 const Discord = require("discord.js");
 
-exports.run = async (client, message) => {
+exports.run = async (client, message, args) => {
+
   message.channel.send(
     new Discord.MessageEmbed()
       .setColor("#ff0000")
