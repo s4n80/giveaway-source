@@ -1,11 +1,4 @@
-/*
-    __    ____    __  __         ____          _           
-   / /   / /\ \  |  \/  |_ __   / ___|___   __| | ___  ___ 
-  / /   / /  \ \ | |\/| | '__| | |   / _ \ / _` |/ _ \/ __|
-  \ \  / /   / / | |  | | |_   | |__| (_) | (_| |  __/\__ \ <3
-   \_\/_/   /_/  |_|  |_|_(_)   \____\___/ \__,_|\___||___/
- 
-*/
+
 const config = require("./config.js"), 
 { Client, Collection, MessageEmbed } = require("discord.js");
 const client = new Client({ disableMentions: "everyone" }),
@@ -129,7 +122,7 @@ readdir("./commands/", (err, files) => {
 
 
 client.on('ready', () => {
-    client.user.setActivity('g!help | multiple languages available!', { type: 'WATCHING' });
+    client.user.setActivity('', { type: 'WATCHING' });
 
  });
 
